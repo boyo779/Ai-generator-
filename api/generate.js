@@ -1,19 +1,20 @@
 export default async function handler(req, res) {
-  // Parameter prompt dari frontend
-  const { prompt } = req.query;
-
   try {
-    // Panggil Pollinations API
-    const response = await fetch(`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true`);
+    const { prompt } = req.query;
+    if (!prompt) throw new Error('Prompt required');
+
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true`;
+    const apiResponse = await fetch(url);
     
-    // Dapatkan buffer gambar
-    const imageBuffer = await response.arrayBuffer();
-    
-    // Kirim kembali sebagai response
+    if (!apiResponse.ok) {
+      throw new Error(`Pollinations API error: ${apiResponse.status}`);
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'image/png');
-    res.send(Buffer.from(imageBuffer));
+    apiResponse.body.pipe(res);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to generate image' });
+    res.status(500).json({ error: error.message });
   }
 }
