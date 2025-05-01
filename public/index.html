@@ -13,23 +13,25 @@
       <img id="generated-image" style="display: none;">
     </div>
   </div>
-
-  <script>
-    async function generateImage() {
-  const prompt = document.getElementById('prompt').value;
+   <script>
+async function generateImage() {
+  const prompt = encodeURIComponent(document.getElementById('prompt').value);
   const imgElement = document.getElementById('generated-image');
   
   if (!prompt) {
-    alert('Masukkan prompt terlebih dahulu');
+    alert('Prompt tidak boleh kosong');
     return;
   }
 
-  imgElement.src = '';
   imgElement.style.display = 'none';
+  imgElement.src = '';
   
   try {
-    // Tambah parameter cache busting
-    const apiUrl = `/api/generate?prompt=${encodeURIComponent(prompt)}&t=${Date.now()}`;
+    // Gunakan URL absolut untuk development/production
+    const apiUrl = window.location.hostname === 'localhost' 
+      ? `http://localhost:3000/api/generate?prompt=${prompt}`
+      : `/api/generate?prompt=${prompt}`;
+    
     const response = await fetch(apiUrl);
     
     if (response.ok) {
@@ -41,9 +43,9 @@
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Gagal generate gambar: ' + error.message);
+    alert('Gagal generate: ' + error.message);
   }
-    } 
-  </script>
+}
+</script> 
 </body>
 </html>
